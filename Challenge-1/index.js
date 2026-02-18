@@ -1,8 +1,7 @@
 // Import necessary Node.js modules
 const fs = require('fs');
 const readline = require('readline');
-const path = require('path'); // ✅ added
-
+const path = require('path'); 
 // Function to calculate Levenshtein distance between two strings
 function calculateDistance(str1, str2) {
     const string1 = str1.toLowerCase();
@@ -69,7 +68,6 @@ function findTopKSimilar(inputWord, wordList, k) {
 
 // Main function
 function main() {
-    // ✅ FIXED PATH HERE
     const filePath = path.join(__dirname, 'words.txt');
     const words = loadWordsFromFile(filePath);
     
