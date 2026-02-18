@@ -1,6 +1,7 @@
 // Import necessary Node.js modules
 const fs = require('fs');
 const readline = require('readline');
+const path = require('path'); // ✅ added
 
 // Function to calculate Levenshtein distance between two strings
 function calculateDistance(str1, str2) {
@@ -21,22 +22,21 @@ function calculateDistance(str1, str2) {
     for (let j = 0; j <= len2; j++) {
         matrix[0][j] = j;
     }
+
     for (let i = 1; i <= len1; i++) {
         for (let j = 1; j <= len2; j++) {
             if (string1[i - 1] === string2[j - 1]) {
                 matrix[i][j] = matrix[i - 1][j - 1];
             } else {
-                // Take minimum of insert, delete, or substitute
                 matrix[i][j] = Math.min(
-                    matrix[i - 1][j] + 1,      // deletion
-                    matrix[i][j - 1] + 1,      // insertion
-                    matrix[i - 1][j - 1] + 1   // substitution
+                    matrix[i - 1][j] + 1,
+                    matrix[i][j - 1] + 1,
+                    matrix[i - 1][j - 1] + 1
                 );
             }
         }
     }
     
-    // Return the final distance
     return matrix[len1][len2];
 }
 
@@ -55,25 +55,23 @@ function loadWordsFromFile(filename) {
         return [];
     }
 }
+
 function findTopKSimilar(inputWord, wordList, k) {
-    // Calculate distance for each word and store with the word
     const wordsWithDistances = wordList.map(word => ({
         word: word,
         distance: calculateDistance(inputWord, word)
     }));
+
     wordsWithDistances.sort((a, b) => a.distance - b.distance);
     
-    // Take top k results
-    const topK = wordsWithDistances.slice(0, k);
-    
-    // Return only the words (not distances)
-    return topK.map(item => item.word);
+    return wordsWithDistances.slice(0, k).map(item => item.word);
 }
 
-// Main function to run the interactive program
+// Main function
 function main() {
-    // Load words from file
-    const words = loadWordsFromFile('words.txt');
+    // ✅ FIXED PATH HERE
+    const filePath = path.join(__dirname, 'words.txt');
+    const words = loadWordsFromFile(filePath);
     
     if (words.length === 0) {
         console.log('No words loaded. Please check words.txt file.');
@@ -84,35 +82,37 @@ function main() {
     console.log('Interactive Approximate Search Program');
     console.log('Type a word and press Enter to find similar words.');
     console.log('Type "exit" to quit.\n');
+
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout
     });
+
     const promptUser = () => {
         rl.question('Input >> ', (input) => {
             const userInput = input.trim();
             
-            // Check if user wants to exit
             if (userInput.toLowerCase() === 'exit') {
                 console.log('Goodbye!');
                 rl.close();
                 return;
             }
             
-            // Check if input is empty
             if (userInput === '') {
                 console.log('Please enter a word.\n');
                 promptUser();
                 return;
             }
+
             const k = 3;
             const similarWords = findTopKSimilar(userInput, words, k);
             
-            // Display results
             console.log(`Output >> ${similarWords.join(', ')}\n`);
             promptUser();
         });
     };
+
     promptUser();
 }
+
 main();
